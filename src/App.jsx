@@ -6,71 +6,65 @@ import CalendarView from './components/CalendarView'
 import CreateEventModal from './components/CreateEventModal'
 import Settings from './components/Settings'
 import { supabase } from './supabase'
+import { getProfile, saveProfile } from './lib/profiles'
+import { getEvents, createEvent } from './lib/events'
+import { getRsvps, upsertRsvp, deleteRsvp } from './lib/rsvps'
 
-function defaultSettings(user) {
+function profileToSettings(profile) {
   return {
-    name: user?.user_metadata?.full_name ?? '',
-    email: user?.email ?? '',
-    phone: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
-    contacts: [],
-    notifications: {
-      remindVia: [],
-      rsvpVia: [],
-    },
+    name: profile.name ?? '',
+    email: profile.email ?? '',
+    phone: profile.phone ?? '',
+    timezone: profile.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    contacts: profile.contacts ?? [],
+    notifications: profile.notifications ?? { remindVia: [], rsvpVia: [] },
   }
 }
 
-const INITIAL_EVENTS = [
-  {
-    id: 1,
-    title: 'Rooftop dinner',
-    date: '2026-04-25',
-    time: '7:00 PM',
-    location: 'The Penthouse, 5th Ave',
-    description: 'Casual dinner to catch up. Bring your appetite.',
-    host: 'Jamie',
-    attendees: ['Jamie', 'Sam', 'Chris', 'Morgan'],
-    responses: { going: ['Sam', 'Chris'], maybe: ['Morgan'], cant: [] },
-  },
-  {
-    id: 2,
-    title: 'Board game night',
-    date: '2026-05-03',
-    time: '6:30 PM',
-    location: "Jamie's place",
-    description: 'Settlers of Catan and more. BYOB.',
-    host: 'Jamie',
-    attendees: ['Jamie', 'Sam', 'Chris', 'Morgan', 'Riley'],
-    responses: { going: ['Jamie', 'Riley'], maybe: ['Chris'], cant: ['Morgan'] },
-  },
-  {
-    id: 3,
-    title: 'Hiking trip',
-    date: '2026-05-10',
-    time: '8:00 AM',
-    location: 'Muir Woods',
-    description: 'About 5 miles round trip, moderate difficulty. Pack snacks.',
-    host: 'Sam',
-    attendees: ['Sam', 'Alex', 'Chris'],
-    responses: { going: ['Sam'], maybe: [], cant: [] },
-  },
-]
 
 export default function App() {
   const [user, setUser] = useState(null)
   const [view, setView] = useState('landing')
   const [prevView, setPrevView] = useState('dashboard')
-  const [events, setEvents] = useState(INITIAL_EVENTS)
+  const [events, setEvents] = useState([])
   const [rsvps, setRsvps] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [settings, setSettings] = useState(null)
+
+  async function loadProfile(authUser) {
+    try {
+      const profile = await getProfile(authUser.id)
+      setSettings(profileToSettings(profile))
+    } catch {
+      setSettings(profileToSettings({ name: authUser.user_metadata?.full_name, email: authUser.email }))
+    }
+  }
+
+  async function loadEvents() {
+    try {
+      const data = await getEvents()
+      setEvents(data)
+    } catch (e) {
+      console.error('Failed to load events', e)
+    }
+  }
+
+  async function loadRsvps(authUser) {
+    try {
+      const data = await getRsvps(authUser.id)
+      setRsvps(data)
+    } catch (e) {
+      console.error('Failed to load rsvps', e)
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
-        setSettings(defaultSettings(session.user))
+        loadProfile(session.user)
+        loadEvents()
+        loadRsvps(session.user)
         setView('dashboard')
       }
     })
@@ -78,11 +72,14 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user)
-        setSettings(prev => prev ?? defaultSettings(session.user))
+        loadProfile(session.user)
+        loadEvents()
+        loadRsvps(session.user)
         setView('dashboard')
       } else {
         setUser(null)
         setSettings(null)
+        setEvents([])
         setView('landing')
         setRsvps({})
       }
@@ -107,23 +104,31 @@ export default function App() {
     await supabase.auth.signOut()
   }
 
-  function handleRsvp(eventId, status) {
-    setRsvps(prev => ({
-      ...prev,
-      [eventId]: prev[eventId] === status ? undefined : status,
-    }))
+  async function handleRsvp(eventId, status) {
+    const current = rsvps[eventId]
+    const next = current === status ? undefined : status
+
+    setRsvps(prev => ({ ...prev, [eventId]: next }))
+
+    try {
+      if (next) {
+        await upsertRsvp(user.id, eventId, next)
+      } else {
+        await deleteRsvp(user.id, eventId)
+      }
+    } catch (e) {
+      console.error('Failed to save rsvp', e)
+      setRsvps(prev => ({ ...prev, [eventId]: current }))
+    }
   }
 
-  function handleCreateEvent(data) {
-    setEvents(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...data,
-        host: user?.name ?? 'You',
-        responses: { going: [], maybe: [], cant: [] },
-      },
-    ])
+  async function handleCreateEvent(data) {
+    try {
+      const event = await createEvent(user.id, settings?.name || 'You', data)
+      setEvents(prev => [...prev, event])
+    } catch (e) {
+      console.error('Failed to create event', e)
+    }
     setShowCreateModal(false)
   }
 
@@ -149,7 +154,14 @@ export default function App() {
       )}
       {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} />}
       {view === 'settings' && settings && (
-        <Settings settings={settings} onSave={setSettings} onCancel={() => navigate(prevView)} />
+        <Settings
+          settings={settings}
+          onSave={async (updated) => {
+            setSettings(updated)
+            await saveProfile(user.id, updated)
+          }}
+          onCancel={() => navigate(prevView)}
+        />
       )}
 
       {showCreateModal && (

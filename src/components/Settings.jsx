@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const TIMEZONES = [
   'America/New_York',
@@ -21,6 +21,66 @@ const TIMEZONES = [
   'Pacific/Auckland',
 ]
 
+const REMIND_OPTIONS = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'Text Message' },
+]
+
+const RSVP_OPTIONS = [
+  { value: 'email', label: 'Email' },
+  { value: 'sms', label: 'Text Message' },
+]
+
+function MultiSelect({ options, selected, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function toggle(value) {
+    onChange(
+      selected.includes(value)
+        ? selected.filter(v => v !== value)
+        : [...selected, value]
+    )
+  }
+
+  const label = selected.length === 0
+    ? 'None'
+    : options.filter(o => selected.includes(o.value)).map(o => o.label).join(', ')
+
+  return (
+    <div className="multiselect" ref={ref}>
+      <button type="button" className="multiselect-trigger" onClick={() => setOpen(o => !o)}>
+        <span>{label}</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 4l4 4 4-4" />
+        </svg>
+      </button>
+      {open && (
+        <div className="multiselect-dropdown">
+          {options.map(opt => (
+            <label key={opt.value} className="multiselect-option">
+              <input
+                type="checkbox"
+                checked={selected.includes(opt.value)}
+                onChange={() => toggle(opt.value)}
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Settings({ settings, onSave, onCancel }) {
   const [form, setForm] = useState(settings)
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '' })
@@ -29,6 +89,10 @@ export default function Settings({ settings, onSave, onCancel }) {
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  function setNotification(field, value) {
+    setForm(prev => ({ ...prev, notifications: { ...prev.notifications, [field]: value } }))
   }
 
   function handleSave(e) {
@@ -170,6 +234,34 @@ export default function Settings({ settings, onSave, onCancel }) {
             <button type="button" className="btn-outline contact-add-btn" onClick={addContact}>
               Add
             </button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <h2 className="settings-section-title">Notifications</h2>
+          <div className="settings-fields">
+            <div className="notification-row">
+              <div>
+                <span className="notification-label">Reminder</span>
+                <p className="notification-sublabel">Remind me of upcoming events I may be attending</p>
+              </div>
+              <MultiSelect
+                options={REMIND_OPTIONS}
+                selected={form.notifications.remindVia}
+                onChange={val => setNotification('remindVia', val)}
+              />
+            </div>
+            <div className="notification-row">
+              <div>
+                <span className="notification-label">RSVP</span>
+                <p className="notification-sublabel">Notify me when someone responds to my event</p>
+              </div>
+              <MultiSelect
+                options={RSVP_OPTIONS}
+                selected={form.notifications.rsvpVia}
+                onChange={val => setNotification('rsvpVia', val)}
+              />
+            </div>
           </div>
         </section>
 

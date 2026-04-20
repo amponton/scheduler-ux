@@ -14,6 +14,10 @@ const DEFAULT_SETTINGS = {
   phone: '',
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
   contacts: [],
+  notifications: {
+    remindVia: [],
+    rsvpVia: [],
+  },
 }
 
 const INITIAL_EVENTS = [

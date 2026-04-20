@@ -1,23 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Nav from './components/Nav'
 import LandingPage from './components/LandingPage'
 import Dashboard from './components/Dashboard'
 import CalendarView from './components/CalendarView'
 import CreateEventModal from './components/CreateEventModal'
 import Settings from './components/Settings'
+import { supabase } from './supabase'
 
-const DEMO_USER = { name: 'Alex', email: 'alex@example.com' }
-
-const DEFAULT_SETTINGS = {
-  name: DEMO_USER.name,
-  email: DEMO_USER.email,
-  phone: '',
-  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
-  contacts: [],
-  notifications: {
-    remindVia: [],
-    rsvpVia: [],
-  },
+function defaultSettings(user) {
+  return {
+    name: user?.user_metadata?.full_name ?? '',
+    email: user?.email ?? '',
+    phone: '',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+    contacts: [],
+    notifications: {
+      remindVia: [],
+      rsvpVia: [],
+    },
+  }
 }
 
 const INITIAL_EVENTS = [
@@ -63,22 +64,47 @@ export default function App() {
   const [events, setEvents] = useState(INITIAL_EVENTS)
   const [rsvps, setRsvps] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+        setSettings(defaultSettings(session.user))
+        setView('dashboard')
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        setSettings(prev => prev ?? defaultSettings(session.user))
+        setView('dashboard')
+      } else {
+        setUser(null)
+        setSettings(null)
+        setView('landing')
+        setRsvps({})
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   function navigate(next) {
     setPrevView(view)
     setView(next)
   }
 
-  function signIn() {
-    setUser(DEMO_USER)
-    setView('dashboard')
+  async function signIn() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
   }
 
-  function signOut() {
-    setUser(null)
-    setView('landing')
-    setRsvps({})
+  async function signOut() {
+    await supabase.auth.signOut()
   }
 
   function handleRsvp(eventId, status) {
@@ -122,7 +148,7 @@ export default function App() {
         />
       )}
       {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} />}
-      {view === 'settings' && (
+      {view === 'settings' && settings && (
         <Settings settings={settings} onSave={setSettings} onCancel={() => navigate(prevView)} />
       )}
 

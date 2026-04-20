@@ -457,7 +457,16 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .contact-remove:hover { color: var(--text-body); }
 .contact-add-btn { white-space: nowrap; width: 56px; padding: 8px 0; text-align: center; }
 .settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
 .settings-save { font-size: 14px; }
+.settings-save:disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}

@@ -55,10 +55,16 @@ const INITIAL_EVENTS = [
 export default function App() {
   const [user, setUser] = useState(null)
   const [view, setView] = useState('landing')
+  const [prevView, setPrevView] = useState('dashboard')
   const [events, setEvents] = useState(INITIAL_EVENTS)
   const [rsvps, setRsvps] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
+
+  function navigate(next) {
+    setPrevView(view)
+    setView(next)
+  }
 
   function signIn() {
     setUser(DEMO_USER)
@@ -96,7 +102,7 @@ export default function App() {
       <Nav
         user={user}
         view={view}
-        onNavigate={setView}
+        onNavigate={navigate}
         onSignIn={signIn}
         onSignOut={signOut}
         onCreateEvent={() => setShowCreateModal(true)}
@@ -113,7 +119,7 @@ export default function App() {
       )}
       {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} />}
       {view === 'settings' && (
-        <Settings settings={settings} onSave={setSettings} />
+        <Settings settings={settings} onSave={setSettings} onCancel={() => navigate(prevView)} />
       )}
 
       {showCreateModal && (

@@ -21,21 +21,20 @@ const TIMEZONES = [
   'Pacific/Auckland',
 ]
 
-export default function Settings({ settings, onSave }) {
+export default function Settings({ settings, onSave, onCancel }) {
   const [form, setForm] = useState(settings)
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '' })
-  const [saved, setSaved] = useState(false)
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(settings)
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
-    setSaved(false)
   }
 
   function handleSave(e) {
     e.preventDefault()
+    if (!isDirty) return
     onSave(form)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   function addContact() {
@@ -175,8 +174,11 @@ export default function Settings({ settings, onSave }) {
         </section>
 
         <div className="settings-footer">
-          <button type="submit" className="btn-outline settings-save">
-            {saved ? 'Saved' : 'Save changes'}
+          <button type="button" className="btn-ghost" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="btn-outline settings-save" disabled={!isDirty}>
+            Save changes
           </button>
         </div>
       </form>

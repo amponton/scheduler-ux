@@ -354,3 +354,59 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
+
+/* === SETTINGS === */
+.settings { flex: 1; padding: 48px 40px; max-width: 640px; }
+.settings-header { margin-bottom: 36px; }
+.settings-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-heading);
+  letter-spacing: -0.3px;
+}
+.settings-form { display: flex; flex-direction: column; gap: 40px; }
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.settings-section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-section-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: -4px;
+}
+.settings-fields { display: flex; flex-direction: column; gap: 14px; }
+.contact-list { display: flex; flex-direction: column; gap: 8px; }
+.contact-row,
+.contact-add-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 56px;
+  gap: 8px;
+  align-items: center;
+}
+.contact-input { min-width: 0; }
+.contact-remove {
+  font-size: 18px;
+  color: var(--text-faint);
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  width: 56px;
+  text-align: center;
+}
+.contact-remove:hover { color: var(--text-body); }
+.contact-add-btn { white-space: nowrap; width: 56px; padding: 8px 0; text-align: center; }
+.settings-footer {
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.settings-save { font-size: 14px; }

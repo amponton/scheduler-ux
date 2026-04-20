@@ -4,8 +4,17 @@ import LandingPage from './components/LandingPage'
 import Dashboard from './components/Dashboard'
 import CalendarView from './components/CalendarView'
 import CreateEventModal from './components/CreateEventModal'
+import Settings from './components/Settings'
 
 const DEMO_USER = { name: 'Alex', email: 'alex@example.com' }
+
+const DEFAULT_SETTINGS = {
+  name: DEMO_USER.name,
+  email: DEMO_USER.email,
+  phone: '',
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York',
+  contacts: [],
+}
 
 const INITIAL_EVENTS = [
   {
@@ -49,6 +58,7 @@ export default function App() {
   const [events, setEvents] = useState(INITIAL_EVENTS)
   const [rsvps, setRsvps] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
 
   function signIn() {
     setUser(DEMO_USER)
@@ -102,6 +112,9 @@ export default function App() {
         />
       )}
       {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} />}
+      {view === 'settings' && (
+        <Settings settings={settings} onSave={setSettings} />
+      )}
 
       {showCreateModal && (
         <CreateEventModal

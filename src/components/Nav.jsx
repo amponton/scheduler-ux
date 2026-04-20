@@ -22,6 +22,12 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
             <button className="btn-outline" onClick={onCreateEvent}>
               + New event
             </button>
+            <button
+              className={`nav-link${view === 'settings' ? ' active' : ''}`}
+              onClick={() => onNavigate('settings')}
+            >
+              Settings
+            </button>
             <button className="nav-link" onClick={onSignOut}>
               Sign out
             </button>

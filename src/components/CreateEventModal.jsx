@@ -99,13 +99,13 @@ export default function CreateEventModal({ onClose, onCreate }) {
           </label>
 
           <label className="form-label">
-            Invite (comma-separated)
+            Invite (email addresses, comma-separated)
             <input
               className="form-input"
               name="attendees"
               value={form.attendees}
               onChange={handleChange}
-              placeholder="Sam, Morgan, Chris…"
+              placeholder="sam@example.com, morgan@example.com…"
             />
           </label>
 

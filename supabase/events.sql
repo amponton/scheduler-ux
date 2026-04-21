@@ -14,10 +14,13 @@ create table public.events (
 
 alter table public.events enable row level security;
 
--- All authenticated users can view all events
-create policy "Authenticated users can view events"
+-- Only the host and email-invited attendees can view an event
+create policy "Host and invited users can view events"
   on public.events for select
-  using (auth.role() = 'authenticated');
+  using (
+    auth.uid() = host_id OR
+    attendees @> to_jsonb(auth.email()::text)
+  );
 
 -- Only the host can create events
 create policy "Users can create own events"

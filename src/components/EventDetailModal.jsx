@@ -1,4 +1,4 @@
-export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose }) {
+export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose, onEdit }) {
   const { id, title, date, time, location, description, responses, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
@@ -21,7 +21,10 @@ export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose })
       <div className="modal">
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
-          <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {onEdit && <button className="event-edit-btn" onClick={() => { onClose(); onEdit(event) }}>Edit</button>}
+            <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+          </div>
         </div>
 
         <div className="event-detail-body">

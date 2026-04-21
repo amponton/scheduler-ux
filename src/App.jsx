@@ -4,10 +4,11 @@ import LandingPage from './components/LandingPage'
 import Dashboard from './components/Dashboard'
 import CalendarView from './components/CalendarView'
 import CreateEventModal from './components/CreateEventModal'
+import EditEventModal from './components/EditEventModal'
 import Settings from './components/Settings'
 import { supabase } from './supabase'
 import { getProfile, saveProfile } from './lib/profiles'
-import { getEvents, createEvent } from './lib/events'
+import { getEvents, createEvent, updateEvent } from './lib/events'
 import { getRsvps, upsertRsvp, deleteRsvp } from './lib/rsvps'
 
 function profileToSettings(profile) {
@@ -29,6 +30,7 @@ export default function App() {
   const [events, setEvents] = useState([])
   const [rsvps, setRsvps] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingEvent, setEditingEvent] = useState(null)
   const [settings, setSettings] = useState(null)
 
   async function loadProfile(authUser) {
@@ -122,6 +124,16 @@ export default function App() {
     }
   }
 
+  async function handleEditEvent(eventId, data) {
+    try {
+      const updated = await updateEvent(eventId, data)
+      setEvents(prev => prev.map(e => e.id === eventId ? updated : e))
+    } catch (e) {
+      console.error('Failed to update event', e)
+    }
+    setEditingEvent(null)
+  }
+
   async function handleCreateEvent(data) {
     try {
       const event = await createEvent(user.id, settings?.name || 'You', data)
@@ -150,9 +162,11 @@ export default function App() {
           rsvps={rsvps}
           onRsvp={handleRsvp}
           onCreateEvent={() => setShowCreateModal(true)}
+          userId={user?.id}
+          onEdit={setEditingEvent}
         />
       )}
-      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} onRsvp={handleRsvp} />}
+      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} />}
       {view === 'settings' && settings && (
         <Settings
           settings={settings}
@@ -168,6 +182,14 @@ export default function App() {
         <CreateEventModal
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateEvent}
+        />
+      )}
+
+      {editingEvent && (
+        <EditEventModal
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSave={handleEditEvent}
         />
       )}
     </>

@@ -226,6 +226,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   gap: 8px;
   margin-bottom: 8px;
 }
+.event-edit-btn { margin-left: auto; font-size: 12px; color: var(--text-muted); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+.event-edit-btn:hover { color: var(--text-heading); border-color: var(--text-muted); }
 .event-date, .event-time { font-size: 13px; color: var(--text-muted); }
 .event-time::before { content: '·'; margin-right: 8px; color: var(--text-faint); }
 .event-title {

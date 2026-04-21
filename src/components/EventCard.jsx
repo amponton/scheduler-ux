@@ -1,4 +1,4 @@
-export default function EventCard({ event, rsvpStatus, onRsvp, showHost }) {
+export default function EventCard({ event, rsvpStatus, onRsvp, showHost, onEdit }) {
   const { id, title, date, time, location, description, responses, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
@@ -16,6 +16,7 @@ export default function EventCard({ event, rsvpStatus, onRsvp, showHost }) {
       <div className="event-meta">
         <span className="event-date">{formattedDate}</span>
         {time && <span className="event-time">{time}</span>}
+        {onEdit && <button className="event-edit-btn" onClick={() => onEdit(event)}>Edit</button>}
       </div>
       <h2 className="event-title">{title}</h2>
       {showHost && host_name && <p className="event-host">Hosted by {host_name}</p>}

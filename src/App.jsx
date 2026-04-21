@@ -29,6 +29,7 @@ export default function App() {
   const [prevView, setPrevView] = useState('dashboard')
   const [events, setEvents] = useState([])
   const [rsvps, setRsvps] = useState({})
+  const [rsvpAttendees, setRsvpAttendees] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState(null)
   const [settings, setSettings] = useState(null)
@@ -53,8 +54,9 @@ export default function App() {
 
   async function loadRsvps(authUser) {
     try {
-      const data = await getRsvps(authUser.id)
-      setRsvps(data)
+      const { statuses, attendees } = await getRsvps(authUser.id)
+      setRsvps(statuses)
+      setRsvpAttendees(attendees)
     } catch (e) {
       console.error('Failed to load rsvps', e)
     }
@@ -84,6 +86,7 @@ export default function App() {
         setEvents([])
         setView('landing')
         setRsvps({})
+        setRsvpAttendees({})
       }
     })
 
@@ -109,18 +112,32 @@ export default function App() {
   async function handleRsvp(eventId, status) {
     const current = rsvps[eventId]
     const next = current === status ? undefined : status
+    const userName = settings?.name || user?.user_metadata?.full_name || user?.email || 'Someone'
+
+    const updateAttendees = (prev, remove, add) => {
+      const a = {
+        going: [...(prev[eventId]?.going ?? [])],
+        maybe: [...(prev[eventId]?.maybe ?? [])],
+        cant: [...(prev[eventId]?.cant ?? [])],
+      }
+      if (remove) a[remove] = a[remove].filter(n => n !== userName)
+      if (add) a[add] = [...a[add], userName]
+      return { ...prev, [eventId]: a }
+    }
 
     setRsvps(prev => ({ ...prev, [eventId]: next }))
+    setRsvpAttendees(prev => updateAttendees(prev, current, next))
 
     try {
       if (next) {
-        await upsertRsvp(user.id, eventId, next)
+        await upsertRsvp(user.id, eventId, next, userName)
       } else {
         await deleteRsvp(user.id, eventId)
       }
     } catch (e) {
       console.error('Failed to save rsvp', e)
       setRsvps(prev => ({ ...prev, [eventId]: current }))
+      setRsvpAttendees(prev => updateAttendees(prev, next, current))
     }
   }
 
@@ -155,18 +172,19 @@ export default function App() {
         onCreateEvent={() => setShowCreateModal(true)}
       />
 
-      {view === 'landing' && <LandingPage onTryDemo={signIn} />}
+      {view === 'landing' && <LandingPage />}
       {view === 'dashboard' && (
         <Dashboard
           events={events}
           rsvps={rsvps}
+          rsvpAttendees={rsvpAttendees}
           onRsvp={handleRsvp}
           onCreateEvent={() => setShowCreateModal(true)}
           userId={user?.id}
           onEdit={setEditingEvent}
         />
       )}
-      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} />}
+      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} rsvpAttendees={rsvpAttendees} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} />}
       {view === 'settings' && settings && (
         <Settings
           settings={settings}

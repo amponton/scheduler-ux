@@ -3,6 +3,7 @@ create table public.rsvps (
   event_id uuid references public.events on delete cascade not null,
   user_id uuid references auth.users on delete cascade not null,
   status text check (status in ('going', 'maybe', 'cant')) not null,
+  user_name text,
   updated_at timestamptz default now(),
   unique (event_id, user_id)
 );

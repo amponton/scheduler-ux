@@ -58,7 +58,7 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
 
               {menuOpen && (
                 <div className="profile-dropdown">
-                  <div className="profile-dropdown-name">{user.name}</div>
+                  <div className="profile-dropdown-name">{user.user_metadata?.full_name ?? user.email}</div>
                   <button
                     className={`profile-dropdown-item${view === 'settings' ? ' active' : ''}`}
                     onClick={() => navigate('settings')}
@@ -76,7 +76,6 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
         ) : (
           <>
             <button className="btn-outline" onClick={onSignIn}>Sign in</button>
-            <button className="btn-outline" onClick={onSignIn}>Get started</button>
           </>
         )}
       </div>

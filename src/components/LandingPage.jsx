@@ -17,7 +17,7 @@ const FEATURES = [
   },
 ]
 
-export default function LandingPage({ onTryDemo }) {
+export default function LandingPage() {
   return (
     <main className="landing">
       <section className="hero">
@@ -28,9 +28,6 @@ export default function LandingPage({ onTryDemo }) {
           Create events, invite friends, and coordinate attendance — all in one
           place. Built for groups of up to 20.
         </p>
-        <button className="btn-outline hero-cta" onClick={onTryDemo}>
-          Try a demo
-        </button>
       </section>
 
       <section className="features">

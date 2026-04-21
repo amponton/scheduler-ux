@@ -1,5 +1,5 @@
-export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose, onEdit }) {
-  const { id, title, date, time, location, description, responses, host_name } = event
+export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onRsvp, onClose, onEdit }) {
+  const { id, title, date, time, location, description, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'long',
@@ -8,9 +8,10 @@ export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose, o
     year: 'numeric',
   })
 
-  const goingCount = responses.going.length
-  const maybeCount = responses.maybe.length
-  const cantCount = responses.cant.length
+  const going = rsvpAttendees?.going ?? []
+  const maybe = rsvpAttendees?.maybe ?? []
+  const cant = rsvpAttendees?.cant ?? []
+  const noResponses = going.length === 0 && maybe.length === 0 && cant.length === 0
 
   function handleOverlayClick(e) {
     if (e.target === e.currentTarget) onClose()
@@ -38,12 +39,10 @@ export default function EventDetailModal({ event, rsvpStatus, onRsvp, onClose, o
           {description && <p className="event-detail-desc">{description}</p>}
 
           <div className="event-responses">
-            {goingCount > 0 && <span className="response-going">{goingCount} going</span>}
-            {maybeCount > 0 && <span className="response-maybe">{maybeCount} maybe</span>}
-            {cantCount > 0 && <span className="response-cant">{cantCount} can't make it</span>}
-            {goingCount === 0 && maybeCount === 0 && cantCount === 0 && (
-              <span style={{ color: 'var(--text-faint)', fontSize: 13 }}>No responses yet</span>
-            )}
+            {noResponses && <span style={{ color: 'var(--text-faint)', fontSize: 13 }}>No responses yet</span>}
+            {going.length > 0 && <span className="response-going">{going.join(', ')} going</span>}
+            {maybe.length > 0 && <span className="response-maybe">{maybe.join(', ')} maybe</span>}
+            {cant.length > 0 && <span className="response-cant">{cant.join(', ')} can't make it</span>}
           </div>
 
           <div className="rsvp-buttons">

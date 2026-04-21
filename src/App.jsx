@@ -152,7 +152,7 @@ export default function App() {
           onCreateEvent={() => setShowCreateModal(true)}
         />
       )}
-      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} />}
+      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} onRsvp={handleRsvp} />}
       {view === 'settings' && settings && (
         <Settings
           settings={settings}

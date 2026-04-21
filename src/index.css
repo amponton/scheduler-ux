@@ -375,6 +375,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .modal-close { font-size: 22px; color: var(--text-muted); padding: 4px 8px; border-radius: 4px; }
 .modal-close:hover { color: var(--text-heading); }
 .modal-form { display: flex; flex-direction: column; gap: 18px; }
+.event-detail-body { display: flex; flex-direction: column; gap: 14px; }
+.event-detail-meta { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.event-detail-row { display: flex; gap: 10px; font-size: 14px; color: var(--text-body); margin: 0; }
+.event-detail-label { font-weight: 500; color: var(--text-muted); min-width: 40px; }
+.event-detail-desc { font-size: 14px; color: var(--text-body); margin: 0; line-height: 1.5; }
 .form-label {
   display: flex;
   flex-direction: column;

@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import EventDetailModal from './EventDetailModal'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function CalendarView({ events, rsvps }) {
+export default function CalendarView({ events, rsvps, onRsvp }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   const firstDow = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -68,6 +70,8 @@ export default function CalendarView({ events, rsvps }) {
                       key={e.id}
                       className={`cal-event-chip${rsvps[e.id] ? ` rsvp-${rsvps[e.id]}` : ''}`}
                       title={e.title}
+                      onClick={() => setSelectedEvent(e)}
+                      style={{ cursor: 'pointer' }}
                     >
                       {e.title}
                     </div>
@@ -78,6 +82,15 @@ export default function CalendarView({ events, rsvps }) {
           )
         })}
       </div>
+
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          rsvpStatus={rsvps[selectedEvent.id]}
+          onRsvp={(id, status) => { onRsvp(id, status); setSelectedEvent(null) }}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
     </main>
   )
 }

@@ -242,7 +242,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .event-desc { font-size: 14px; color: var(--text-body); margin-top: 10px; line-height: 1.6; }
 .event-card-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding-top: 16px;
   border-top: 1px solid var(--border);
@@ -250,10 +250,19 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   gap: 12px;
   flex-wrap: wrap;
 }
-.event-responses { display: flex; gap: 12px; font-size: 13px; }
+.event-responses { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
 .response-going { color: #5a8a6a; }
 .response-maybe { color: #a07840; }
 .response-cant { color: #b05050; }
+.attendee-group { display: flex; flex-direction: column; gap: 2px; }
+.attendee-group-label { font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.8; }
+.attendee-name { color: var(--text-body); font-size: 13px; }
+.attendee-more-btn { font-size: 12px; color: var(--text-muted); text-align: left; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.attendee-more-btn:hover { color: var(--text-heading); }
+.attendees-modal { max-width: 320px; }
+.attendees-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.attendees-list-item { font-size: 14px; color: var(--text-body); padding: 8px 0; border-bottom: 1px solid var(--border); }
+.attendees-list-item:last-child { border-bottom: none; }
 
 .rsvp-buttons { display: flex; gap: 6px; }
 .rsvp-btn {

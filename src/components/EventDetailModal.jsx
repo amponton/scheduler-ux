@@ -1,3 +1,5 @@
+import AttendeeGroup from './AttendeeGroup'
+
 export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onRsvp, onClose, onEdit }) {
   const { id, title, date, time, location, description, host_name } = event
 
@@ -40,9 +42,9 @@ export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onR
 
           <div className="event-responses">
             {noResponses && <span style={{ color: 'var(--text-faint)', fontSize: 13 }}>No responses yet</span>}
-            {going.length > 0 && <span className="response-going">{going.join(', ')} going</span>}
-            {maybe.length > 0 && <span className="response-maybe">{maybe.join(', ')} maybe</span>}
-            {cant.length > 0 && <span className="response-cant">{cant.join(', ')} can't make it</span>}
+            <AttendeeGroup label="Attending" names={going} colorClass="response-going" />
+            <AttendeeGroup label="Maybe" names={maybe} colorClass="response-maybe" />
+            <AttendeeGroup label="Can't make it" names={cant} colorClass="response-cant" />
           </div>
 
           <div className="rsvp-buttons">

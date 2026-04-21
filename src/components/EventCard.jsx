@@ -1,5 +1,5 @@
-export default function EventCard({ event, rsvpStatus, onRsvp }) {
-  const { id, title, date, time, location, description, responses } = event
+export default function EventCard({ event, rsvpStatus, onRsvp, showHost }) {
+  const { id, title, date, time, location, description, responses, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'short',
@@ -18,6 +18,7 @@ export default function EventCard({ event, rsvpStatus, onRsvp }) {
         {time && <span className="event-time">{time}</span>}
       </div>
       <h2 className="event-title">{title}</h2>
+      {showHost && host_name && <p className="event-host">Hosted by {host_name}</p>}
       {location && <p className="event-location">{location}</p>}
       {description && <p className="event-desc">{description}</p>}
 

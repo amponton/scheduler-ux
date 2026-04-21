@@ -26,6 +26,7 @@ export default function Dashboard({ events, rsvps, onRsvp, onCreateEvent }) {
               event={event}
               rsvpStatus={rsvps[event.id]}
               onRsvp={onRsvp}
+              showHost
             />
           ))}
         </div>

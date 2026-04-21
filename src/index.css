@@ -235,6 +235,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   margin-bottom: 5px;
   letter-spacing: -0.2px;
 }
+.event-host { font-size: 13px; color: var(--text-faint); margin-bottom: 2px; }
 .event-location { font-size: 14px; color: var(--text-muted); }
 .event-desc { font-size: 14px; color: var(--text-body); margin-top: 10px; line-height: 1.6; }
 .event-card-footer {

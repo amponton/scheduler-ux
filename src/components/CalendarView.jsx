@@ -3,7 +3,7 @@ import EventDetailModal from './EventDetailModal'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, userId, onEdit }) {
+export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, userId, onEdit, onDelete }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
@@ -91,6 +91,7 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
           onRsvp={(id, status) => { onRsvp(id, status); setSelectedEvent(null) }}
           onClose={() => setSelectedEvent(null)}
           onEdit={selectedEvent.host_id === userId ? onEdit : undefined}
+          onDelete={selectedEvent.host_id === userId ? onDelete : undefined}
         />
       )}
     </main>

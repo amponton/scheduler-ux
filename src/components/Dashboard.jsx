@@ -1,6 +1,6 @@
 import EventCard from './EventCard'
 
-export default function Dashboard({ events, rsvps, rsvpAttendees, onRsvp, onCreateEvent, userId, onEdit }) {
+export default function Dashboard({ events, rsvps, rsvpAttendees, onRsvp, onCreateEvent, userId, onEdit, onDelete }) {
   const today = new Date().toISOString().split('T')[0]
   const sorted = [...events].sort((a, b) => (a.date > b.date ? 1 : -1))
   const upcoming = sorted.filter(e => e.date >= today)
@@ -29,6 +29,7 @@ export default function Dashboard({ events, rsvps, rsvpAttendees, onRsvp, onCrea
               onRsvp={onRsvp}
               showHost
               onEdit={event.host_id === userId ? onEdit : undefined}
+              onDelete={event.host_id === userId ? onDelete : undefined}
             />
           ))}
         </div>

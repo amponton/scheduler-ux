@@ -228,6 +228,14 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 .event-edit-btn { margin-left: auto; font-size: 12px; color: var(--text-muted); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
 .event-edit-btn:hover { color: var(--text-heading); border-color: var(--text-muted); }
+.event-delete-btn { font-size: 12px; color: #b05050; padding: 2px 8px; border-radius: 4px; border: 1px solid #e8c8c8; }
+.event-delete-btn:hover { background: #fdf0f0; }
+.event-delete-btn.confirm { background: #b05050; color: #fff; border-color: #b05050; }
+.event-delete-btn.confirm:hover { background: #8a3030; }
+.delete-confirm-group { display: flex; align-items: center; gap: 0; border: 1px solid #e8c8c8; border-radius: 4px; overflow: hidden; }
+.delete-confirm-group .event-delete-btn.confirm { border-radius: 0; border: none; border-right: 1px solid #e8c8c8; }
+.delete-cancel-btn { font-size: 12px; color: var(--text-muted); padding: 2px 8px; background: none; border: none; }
+.delete-cancel-btn:hover { color: var(--text-heading); background: var(--bg); }
 .event-date, .event-time { font-size: 13px; color: var(--text-muted); }
 .event-time::before { content: '·'; margin-right: 8px; color: var(--text-faint); }
 .event-title {

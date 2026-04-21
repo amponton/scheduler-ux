@@ -8,7 +8,7 @@ import EditEventModal from './components/EditEventModal'
 import Settings from './components/Settings'
 import { supabase } from './supabase'
 import { getProfile, saveProfile } from './lib/profiles'
-import { getEvents, createEvent, updateEvent } from './lib/events'
+import { getEvents, createEvent, updateEvent, deleteEvent } from './lib/events'
 import { getRsvps, upsertRsvp, deleteRsvp } from './lib/rsvps'
 
 function profileToSettings(profile) {
@@ -141,6 +141,16 @@ export default function App() {
     }
   }
 
+  async function handleDeleteEvent(eventId) {
+    setEvents(prev => prev.filter(e => e.id !== eventId))
+    try {
+      await deleteEvent(eventId)
+    } catch (e) {
+      console.error('Failed to delete event', e)
+      loadEvents()
+    }
+  }
+
   async function handleEditEvent(eventId, data) {
     try {
       const updated = await updateEvent(eventId, data)
@@ -182,9 +192,10 @@ export default function App() {
           onCreateEvent={() => setShowCreateModal(true)}
           userId={user?.id}
           onEdit={setEditingEvent}
+          onDelete={handleDeleteEvent}
         />
       )}
-      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} rsvpAttendees={rsvpAttendees} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} />}
+      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} rsvpAttendees={rsvpAttendees} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} onDelete={handleDeleteEvent} />}
       {view === 'settings' && settings && (
         <Settings
           settings={settings}

@@ -20,7 +20,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
     },
     body: JSON.stringify({ from: FROM_ADDRESS, to, subject, html }),
   })
-  if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
+  if (!res.ok) throw new Error(`Resend rejected (${res.status}): ${await res.text()}`)
 }
 
 async function sendSms(to: string, body: string): Promise<void> {

@@ -31,8 +31,8 @@ async function sendInvites(emails: string[], event: Record<string, unknown>): Pr
   const html = buildEmailHtml(event)
 
   const results = await Promise.allSettled(
-    emails.map((email) =>
-      fetch('https://api.resend.com/emails', {
+    emails.map(async (email) => {
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${RESEND_API_KEY}`,
@@ -45,13 +45,16 @@ async function sendInvites(emails: string[], event: Record<string, unknown>): Pr
           html,
         }),
       })
-    )
+      if (!res.ok) {
+        const body = await res.text()
+        throw new Error(`Resend rejected ${email} (${res.status}): ${body}`)
+      }
+    })
   )
 
-  const failures = results.filter((r) => r.status === 'rejected')
-  if (failures.length > 0) {
-    console.error(`${failures.length} invite(s) failed to send:`, failures)
-  }
+  results.forEach((r) => {
+    if (r.status === 'rejected') console.error('Failed to send invite:', r.reason)
+  })
 }
 
 serve(async (req) => {

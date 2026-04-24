@@ -4,6 +4,13 @@
 
 Gather is a social event scheduling app. Authenticated users can create events, browse upcoming and past events in a dashboard or calendar view, and RSVP to events with a going/maybe/can't status. Hosts can edit and delete their own events. Auth is Google OAuth via Supabase.
 
+## Stack
+
+- **Frontend**: React 19 + Vite 8 (JavaScript, no TypeScript)
+- **Backend**: Supabase (Postgres, Auth, RLS, Edge Functions)
+- **Auth**: Google OAuth via Supabase
+- **Styling**: Plain CSS (`src/App.css`, `src/index.css`) — no Tailwind, no CSS-in-JS
+
 ## Tech stack
 
 - **React 19** + **Vite 8** (ESM, no TypeScript)
@@ -74,6 +81,12 @@ Triggers on INSERT or UPDATE of an event. Sends HTML email invitations via Resen
 ### `notify-host-on-rsvp`
 Triggers on INSERT of an RSVP. Queries the host's profile, checks their `notifications.rsvpVia` preference, and sends a notification via email (Resend) or SMS (Twilio). Skips notification if the host is RSVPing to their own event. Uses the service-role key to bypass RLS on profile queries.
 
+## Conventions
+
+- **New DB tables must include RLS policies** in the same change — never add a table without them.
+- **Edge functions must include error logging** — add `console.error` on every catch block and verify invocation end-to-end before considering it done (silent failures have caused debugging pain before).
+- **Destructive UI actions use inline confirmation** — avoid `window.confirm()` and avoid multi-step modals. Show the confirm prompt inline next to the trigger element.
+
 ## Key conventions
 
 - **Lib functions throw on error** — callers use try/catch and log to console.
@@ -87,6 +100,11 @@ Triggers on INSERT of an RSVP. Queries the host's profile, checks their `notific
   - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` (optional, for SMS notifications)
   - `APP_URL` (optional, defaults to `https://gather.app`)
   - `FROM_ADDRESS` (optional, defaults to `Gather <invites@gather.app>`)
+
+## Working style
+
+- If the user references an attachment, screenshot, or file, confirm it is actually present before searching the codebase for it.
+- For UI work, prefer small verifiable steps: build → describe/screenshot → refine. Don't assume the first pass is accepted.
 
 ## Dev commands
 

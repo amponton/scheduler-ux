@@ -10,9 +10,19 @@ create table public.rsvps (
 
 alter table public.rsvps enable row level security;
 
-create policy "Authenticated users can view all rsvps"
+create policy "Users can view rsvps for accessible events"
   on public.rsvps for select
-  using (auth.role() = 'authenticated');
+  using (
+    auth.uid() = user_id OR
+    exists (
+      select 1 from public.events
+      where events.id = rsvps.event_id
+      and (
+        events.host_id = auth.uid() OR
+        events.attendees @> to_jsonb(auth.email()::text)
+      )
+    )
+  );
 
 -- Users can only RSVP to events they are host or invited to
 create policy "Users can insert own rsvps"

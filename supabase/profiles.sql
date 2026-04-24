@@ -4,7 +4,10 @@ create table public.profiles (
   email text,
   phone text,
   timezone text,
-  notifications jsonb default '{"remindVia": [], "rsvpVia": []}',
+  notifications jsonb default '{"remindVia": [], "rsvpVia": []}' check (
+    jsonb_typeof(notifications->'remindVia') = 'array' AND
+    jsonb_typeof(notifications->'rsvpVia') = 'array'
+  ),
   contacts jsonb default '[]',
   updated_at timestamptz default now()
 );

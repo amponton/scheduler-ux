@@ -142,12 +142,13 @@ export default function App() {
   }
 
   async function handleDeleteEvent(eventId) {
-    setEvents(prev => prev.filter(e => e.id !== eventId))
+    const snapshot = events
+    setEvents(events.filter(e => e.id !== eventId))
     try {
       await deleteEvent(eventId)
     } catch (e) {
       console.error('Failed to delete event', e)
-      loadEvents()
+      setEvents(snapshot)
     }
   }
 

@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import AttendeeGroup from './AttendeeGroup'
+import DeleteConfirmButton from './DeleteConfirmButton'
 
 export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, showHost, onEdit, onDelete }) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
   const { id, title, date, time, location, description, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
@@ -22,15 +21,7 @@ export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, sh
         <span className="event-date">{formattedDate}</span>
         {time && <span className="event-time">{time}</span>}
         {onEdit && <button className="event-edit-btn" onClick={() => onEdit(event)}>Edit</button>}
-        {onDelete && !confirmDelete && (
-          <button className="event-delete-btn" onClick={() => setConfirmDelete(true)}>Delete</button>
-        )}
-        {onDelete && confirmDelete && (
-          <div className="delete-confirm-group">
-            <button className="event-delete-btn confirm" onClick={() => onDelete(id)}>Yes, delete</button>
-            <button className="delete-cancel-btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
-          </div>
-        )}
+        {onDelete && <DeleteConfirmButton onConfirm={() => onDelete(id)} />}
       </div>
       <h2 className="event-title">{title}</h2>
       {showHost && host_name && <p className="event-host">Hosted by {host_name}</p>}
@@ -58,7 +49,6 @@ export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, sh
           ))}
         </div>
       </div>
-
     </div>
   )
 }

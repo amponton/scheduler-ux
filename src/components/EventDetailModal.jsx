@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import AttendeeGroup from './AttendeeGroup'
+import DeleteConfirmButton from './DeleteConfirmButton'
 
 export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onRsvp, onClose, onEdit, onDelete }) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
   const { id, title, date, time, location, description, host_name } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
@@ -28,15 +27,7 @@ export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onR
           <h2 className="modal-title">{title}</h2>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {onEdit && <button className="event-edit-btn" onClick={() => { onClose(); onEdit(event) }}>Edit</button>}
-            {onDelete && !confirmDelete && (
-              <button className="event-delete-btn" onClick={() => setConfirmDelete(true)}>Delete</button>
-            )}
-            {onDelete && confirmDelete && (
-              <div className="delete-confirm-group">
-                <button className="event-delete-btn confirm" onClick={() => { onDelete(id); onClose() }}>Yes, delete</button>
-                <button className="delete-cancel-btn" onClick={() => setConfirmDelete(false)}>Cancel</button>
-              </div>
-            )}
+            {onDelete && <DeleteConfirmButton onConfirm={() => { onDelete(id); onClose() }} />}
             <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
           </div>
         </div>
@@ -69,7 +60,6 @@ export default function EventDetailModal({ event, rsvpStatus, rsvpAttendees, onR
               </button>
             ))}
           </div>
-
         </div>
       </div>
     </div>

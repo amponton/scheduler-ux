@@ -437,6 +437,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   border-radius: 50%;
 }
 .cal-day-today .cal-day-num { background: var(--text-heading); color: var(--surface); }
+.cal-day-num-overflow { color: var(--text-faint); }
 .cal-event-chip {
   font-size: 11px;
   padding: 2px 7px;

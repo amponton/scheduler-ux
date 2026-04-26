@@ -13,18 +13,33 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
   const firstDow = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
 
-  const cells = [
-    ...Array(firstDow).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ]
+  const prevY = month === 0 ? year - 1 : year
+  const prevM = month === 0 ? 11 : month - 1
+  const daysInPrevMonth = new Date(prevY, prevM + 1, 0).getDate()
+
+  const nextY = month === 11 ? year + 1 : year
+  const nextM = month === 11 ? 0 : month + 1
+
+  const leadingCells = Array.from({ length: firstDow }, (_, i) => ({
+    day: daysInPrevMonth - firstDow + 1 + i, year: prevY, month: prevM, current: false,
+  }))
+  const currentCells = Array.from({ length: daysInMonth }, (_, i) => ({
+    day: i + 1, year, month, current: true,
+  }))
+  const trailingCount = (leadingCells.length + currentCells.length) % 7
+  const trailingCells = trailingCount === 0 ? [] : Array.from({ length: 7 - trailingCount }, (_, i) => ({
+    day: i + 1, year: nextY, month: nextM, current: false,
+  }))
+
+  const cells = [...leadingCells, ...currentCells, ...trailingCells]
 
   const monthLabel = new Date(year, month).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
   })
 
-  function eventsOnDay(day) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  function eventsOnDay(y, m, d) {
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
     return events.filter(e => e.date === dateStr)
   }
 
@@ -38,11 +53,10 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
     else setMonth(m => m + 1)
   }
 
-  const isToday = day =>
-    day &&
-    year === today.getFullYear() &&
-    month === today.getMonth() &&
-    day === today.getDate()
+  const isToday = cell =>
+    cell.year === today.getFullYear() &&
+    cell.month === today.getMonth() &&
+    cell.day === today.getDate()
 
   return (
     <main className="calendar-view">
@@ -56,34 +70,32 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
         {DOW.map(d => (
           <div key={d} className="cal-dow">{d}</div>
         ))}
-        {cells.map((day, i) => {
-          const dayEvents = day ? eventsOnDay(day) : []
+        {cells.map((cell, i) => {
+          const dayEvents = eventsOnDay(cell.year, cell.month, cell.day)
           return (
             <div
               key={i}
-              className={`cal-day${!day ? ' cal-day-empty' : ''}${isToday(day) ? ' cal-day-today' : ''}`}
+              className={`cal-day${!cell.current ? ' cal-day-empty' : ''}${isToday(cell) ? ' cal-day-today' : ''}`}
             >
-              {day && (
-                <>
-                  <span className="cal-day-num">{day}</span>
-                  {dayEvents.map(e => {
-                    const bg = getEventBackground(e.image_url)
-                    const chipStyle = { cursor: 'pointer' }
-                    if (bg?.type === 'preset') chipStyle.background = bg.bg
-                    return (
-                      <div
-                        key={e.id}
-                        className={`cal-event-chip${!bg?.type && rsvps[e.id] ? ` rsvp-${rsvps[e.id]}` : ''}`}
-                        title={e.title}
-                        onClick={() => setSelectedEvent(e)}
-                        style={chipStyle}
-                      >
-                        {e.title}
-                      </div>
-                    )
-                  })}
-                </>
-              )}
+              <span className={`cal-day-num${!cell.current ? ' cal-day-num-overflow' : ''}`}>
+                {cell.day}
+              </span>
+              {dayEvents.map(e => {
+                const bg = getEventBackground(e.image_url)
+                const chipStyle = { cursor: 'pointer' }
+                if (bg?.type === 'preset') chipStyle.background = bg.bg
+                return (
+                  <div
+                    key={e.id}
+                    className={`cal-event-chip${!bg?.type && rsvps[e.id] ? ` rsvp-${rsvps[e.id]}` : ''}`}
+                    title={e.title}
+                    onClick={() => setSelectedEvent(e)}
+                    style={chipStyle}
+                  >
+                    {e.title}
+                  </div>
+                )
+              })}
             </div>
           )
         })}

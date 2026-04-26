@@ -3,11 +3,13 @@ create table public.profiles (
   name text,
   email text,
   phone text,
+  avatar_url text,
   timezone text,
   notifications jsonb default '{"remindVia": [], "rsvpVia": []}' check (
     jsonb_typeof(notifications->'remindVia') = 'array' AND
     jsonb_typeof(notifications->'rsvpVia') = 'array'
   ),
+  -- contacts: array of {id, name, email} objects
   contacts jsonb default '[]',
   updated_at timestamptz default now()
 );
@@ -26,7 +28,6 @@ create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
--- Auto-create a profile row when a new user signs up
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
@@ -44,3 +45,4 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+

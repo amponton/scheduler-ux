@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import EventDetailModal from './EventDetailModal'
+import { getEventBackground } from './EventImage'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -65,17 +66,22 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
               {day && (
                 <>
                   <span className="cal-day-num">{day}</span>
-                  {dayEvents.map(e => (
-                    <div
-                      key={e.id}
-                      className={`cal-event-chip${rsvps[e.id] ? ` rsvp-${rsvps[e.id]}` : ''}`}
-                      title={e.title}
-                      onClick={() => setSelectedEvent(e)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {e.title}
-                    </div>
-                  ))}
+                  {dayEvents.map(e => {
+                    const bg = getEventBackground(e.image_url)
+                    const chipStyle = { cursor: 'pointer' }
+                    if (bg?.type === 'preset') chipStyle.background = bg.bg
+                    return (
+                      <div
+                        key={e.id}
+                        className={`cal-event-chip${!bg?.type && rsvps[e.id] ? ` rsvp-${rsvps[e.id]}` : ''}`}
+                        title={e.title}
+                        onClick={() => setSelectedEvent(e)}
+                        style={chipStyle}
+                      >
+                        {e.title}
+                      </div>
+                    )
+                  })}
                 </>
               )}
             </div>

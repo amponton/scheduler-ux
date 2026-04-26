@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 
-export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCreateEvent }) {
+function getInitials(name) {
+  return name
+    .split(' ')
+    .map(n => n[0] ?? '')
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || '?'
+}
+
+export default function Nav({ user, avatarUrl, view, onNavigate, onSignIn, onSignOut, onCreateEvent }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -18,6 +27,8 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
     onNavigate(v)
     setMenuOpen(false)
   }
+
+  const displayName = user?.user_metadata?.full_name ?? user?.email ?? ''
 
   return (
     <nav className="nav">
@@ -50,15 +61,22 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
                 aria-label="Profile menu"
                 aria-expanded={menuOpen}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                </svg>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt={displayName} className="nav-avatar-img" />
+                  : displayName
+                    ? <span className="nav-avatar-initials">{getInitials(displayName)}</span>
+                    : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                    )
+                }
               </button>
 
               {menuOpen && (
                 <div className="profile-dropdown">
-                  <div className="profile-dropdown-name">{user.user_metadata?.full_name ?? user.email}</div>
+                  <div className="profile-dropdown-name">{displayName}</div>
                   <button
                     className={`profile-dropdown-item${view === 'settings' ? ' active' : ''}`}
                     onClick={() => navigate('settings')}
@@ -74,9 +92,7 @@ export default function Nav({ user, view, onNavigate, onSignIn, onSignOut, onCre
             </div>
           </>
         ) : (
-          <>
-            <button className="btn-outline" onClick={onSignIn}>Sign in</button>
-          </>
+          <button className="btn-outline" onClick={onSignIn}>Sign in</button>
         )}
       </div>
     </nav>

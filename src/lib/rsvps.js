@@ -3,7 +3,7 @@ import { supabase } from '../supabase'
 export async function getRsvps(userId) {
   const { data, error } = await supabase
     .from('rsvps')
-    .select('event_id, user_id, status, user_name')
+    .select('event_id, user_id, status, user_name, user_email, user_avatar_url')
 
   if (error) throw error
 
@@ -11,20 +11,32 @@ export async function getRsvps(userId) {
   const attendees = {}
 
   for (const row of data) {
-    const name = row.user_name || 'Someone'
+    const attendee = {
+      name: row.user_name || 'Someone',
+      email: row.user_email || '',
+      avatar_url: row.user_avatar_url || null,
+    }
     if (!attendees[row.event_id]) attendees[row.event_id] = { going: [], maybe: [], cant: [] }
-    attendees[row.event_id][row.status].push(name)
+    attendees[row.event_id][row.status].push(attendee)
     if (row.user_id === userId) statuses[row.event_id] = row.status
   }
 
   return { statuses, attendees }
 }
 
-export async function upsertRsvp(userId, eventId, status, userName) {
+export async function upsertRsvp(userId, eventId, status, userName, userEmail, userAvatarUrl) {
   const { error } = await supabase
     .from('rsvps')
     .upsert(
-      { user_id: userId, event_id: eventId, status, user_name: userName, updated_at: new Date().toISOString() },
+      {
+        user_id: userId,
+        event_id: eventId,
+        status,
+        user_name: userName,
+        user_email: userEmail ?? null,
+        user_avatar_url: userAvatarUrl ?? null,
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: 'event_id,user_id' }
     )
 

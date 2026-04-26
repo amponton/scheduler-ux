@@ -1,17 +1,41 @@
 import { useState } from 'react'
+import ImagePicker from './ImagePicker'
 
-export default function EditEventModal({ event, onClose, onSave }) {
+export default function EditEventModal({ event, onClose, onSave, userId }) {
   const [form, setForm] = useState({
     title: event.title ?? '',
     date: event.date ?? '',
     time: event.time ?? '',
     location: event.location ?? '',
     description: event.description ?? '',
-    attendees: (event.attendees ?? []).join(', '),
+    attendees: event.attendees ?? [],
+    image_url: event.image_url ?? null,
   })
+  const [newInvitee, setNewInvitee] = useState({ name: '', email: '' })
 
   function handleChange(e) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  function addInvitee() {
+    if (!newInvitee.name.trim() || !newInvitee.email.trim()) return
+    setForm(prev => ({ ...prev, attendees: [...prev.attendees, { ...newInvitee }] }))
+    setNewInvitee({ name: '', email: '' })
+  }
+
+  function removeInvitee(i) {
+    setForm(prev => ({ ...prev, attendees: prev.attendees.filter((_, idx) => idx !== i) }))
+  }
+
+  function updateInvitee(i, field, value) {
+    setForm(prev => ({
+      ...prev,
+      attendees: prev.attendees.map((inv, idx) => idx === i ? { ...inv, [field]: value } : inv),
+    }))
+  }
+
+  function handleInviteeKeyDown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addInvitee() }
   }
 
   function handleSubmit(e) {
@@ -23,7 +47,8 @@ export default function EditEventModal({ event, onClose, onSave }) {
       time: form.time,
       location: form.location,
       description: form.description,
-      attendees: form.attendees.split(',').map(s => s.trim()).filter(Boolean),
+      attendees: form.attendees,
+      image_url: form.image_url,
     })
   }
 
@@ -33,7 +58,7 @@ export default function EditEventModal({ event, onClose, onSave }) {
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal">
+      <div className="modal modal-wide">
         <div className="modal-header">
           <h2 className="modal-title">Edit event</h2>
           <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
@@ -98,16 +123,67 @@ export default function EditEventModal({ event, onClose, onSave }) {
             />
           </label>
 
-          <label className="form-label">
-            Invite (email addresses, comma-separated)
-            <input
-              className="form-input"
-              name="attendees"
-              value={form.attendees}
-              onChange={handleChange}
-              placeholder="sam@example.com, morgan@example.com…"
+          <div className="form-label">
+            Event image
+            <ImagePicker
+              value={form.image_url}
+              onChange={val => setForm(prev => ({ ...prev, image_url: val }))}
+              userId={userId}
             />
-          </label>
+          </div>
+
+          <div className="form-label">
+            Invitees
+            {form.attendees.length > 0 && (
+              <div className="invitee-list">
+                {form.attendees.map((inv, i) => (
+                  <div key={i} className="invitee-row">
+                    <input
+                      className="form-input invitee-input"
+                      value={inv.name}
+                      onChange={e => updateInvitee(i, 'name', e.target.value)}
+                      placeholder="Name"
+                    />
+                    <input
+                      className="form-input invitee-input"
+                      type="email"
+                      value={inv.email}
+                      onChange={e => updateInvitee(i, 'email', e.target.value)}
+                      placeholder="Email"
+                    />
+                    <button
+                      type="button"
+                      className="invitee-remove"
+                      onClick={() => removeInvitee(i)}
+                      aria-label="Remove invitee"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="invitee-add-row">
+              <input
+                className="form-input"
+                value={newInvitee.name}
+                onChange={e => setNewInvitee(prev => ({ ...prev, name: e.target.value }))}
+                onKeyDown={handleInviteeKeyDown}
+                placeholder="Name"
+              />
+              <input
+                className="form-input"
+                type="email"
+                value={newInvitee.email}
+                onChange={e => setNewInvitee(prev => ({ ...prev, email: e.target.value }))}
+                onKeyDown={handleInviteeKeyDown}
+                placeholder="Email"
+              />
+              <button type="button" className="btn-outline" onClick={addInvitee}>
+                Add
+              </button>
+            </div>
+          </div>
 
           <div className="form-actions">
             <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>

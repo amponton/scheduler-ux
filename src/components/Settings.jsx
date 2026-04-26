@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { uploadAvatar } from '../lib/storage'
 
 const TIMEZONES = [
   'America/New_York',
@@ -30,6 +31,15 @@ const RSVP_OPTIONS = [
   { value: 'email', label: 'Email' },
   { value: 'sms', label: 'Text Message' },
 ]
+
+function getInitials(name) {
+  return name
+    .split(' ')
+    .map(n => n[0] ?? '')
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || '?'
+}
 
 function MultiSelect({ options, selected, onChange }) {
   const [open, setOpen] = useState(false)
@@ -81,9 +91,11 @@ function MultiSelect({ options, selected, onChange }) {
   )
 }
 
-export default function Settings({ settings, onSave, onCancel }) {
+export default function Settings({ settings, userId, onSave, onCancel }) {
   const [form, setForm] = useState(settings)
-  const [newContact, setNewContact] = useState({ name: '', email: '', phone: '' })
+  const [newContact, setNewContact] = useState({ name: '', email: '' })
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const avatarInputRef = useRef(null)
 
   const isDirty = JSON.stringify(form) !== JSON.stringify(settings)
 
@@ -101,10 +113,25 @@ export default function Settings({ settings, onSave, onCancel }) {
     onSave(form)
   }
 
+  async function handleAvatarFile(e) {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+    setAvatarUploading(true)
+    try {
+      const url = await uploadAvatar(userId, file)
+      set('avatar_url', url)
+    } catch (err) {
+      console.error('Failed to upload avatar', err)
+    } finally {
+      setAvatarUploading(false)
+      e.target.value = ''
+    }
+  }
+
   function addContact() {
-    if (!newContact.name.trim()) return
+    if (!newContact.name.trim() || !newContact.email.trim()) return
     set('contacts', [...form.contacts, { ...newContact, id: Date.now() }])
-    setNewContact({ name: '', email: '', phone: '' })
+    setNewContact({ name: '', email: '' })
   }
 
   function removeContact(id) {
@@ -114,6 +141,8 @@ export default function Settings({ settings, onSave, onCancel }) {
   function updateContact(id, field, value) {
     set('contacts', form.contacts.map(c => c.id === id ? { ...c, [field]: value } : c))
   }
+
+  const displayName = form.name || form.email || ''
 
   return (
     <div className="settings">
@@ -125,6 +154,37 @@ export default function Settings({ settings, onSave, onCancel }) {
         <section className="settings-section">
           <h2 className="settings-section-title">Profile</h2>
           <div className="settings-fields">
+            <div className="avatar-upload-row">
+              <button
+                type="button"
+                className="avatar-upload-btn"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                title="Change profile photo"
+              >
+                {form.avatar_url
+                  ? <img src={form.avatar_url} alt={displayName} className="avatar-img" />
+                  : <span className="avatar-initials">{getInitials(displayName)}</span>
+                }
+                <span className="avatar-upload-overlay">
+                  {avatarUploading ? '…' : '📷'}
+                </span>
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarFile}
+              />
+              <div className="avatar-upload-hint">
+                <span className="form-label" style={{ marginBottom: 2 }}>Profile photo</span>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                  {form.avatar_url ? 'Click to change' : 'Click to upload'}
+                </span>
+              </div>
+            </div>
+
             <label className="form-label">
               Name
               <input
@@ -149,7 +209,7 @@ export default function Settings({ settings, onSave, onCancel }) {
               <input
                 className="form-input"
                 type="tel"
-                value={form.phone}
+                value={form.phone ?? ''}
                 onChange={e => set('phone', e.target.value)}
                 placeholder="+1 (555) 000-0000"
               />
@@ -190,13 +250,6 @@ export default function Settings({ settings, onSave, onCancel }) {
                     onChange={e => updateContact(contact.id, 'email', e.target.value)}
                     placeholder="Email"
                   />
-                  <input
-                    className="form-input contact-input"
-                    type="tel"
-                    value={contact.phone}
-                    onChange={e => updateContact(contact.id, 'phone', e.target.value)}
-                    placeholder="Phone"
-                  />
                   <button
                     type="button"
                     className="contact-remove"
@@ -223,13 +276,6 @@ export default function Settings({ settings, onSave, onCancel }) {
               value={newContact.email}
               onChange={e => setNewContact(prev => ({ ...prev, email: e.target.value }))}
               placeholder="Email"
-            />
-            <input
-              className="form-input contact-input"
-              type="tel"
-              value={newContact.phone}
-              onChange={e => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
-              placeholder="Phone"
             />
             <button type="button" className="btn-outline contact-add-btn" onClick={addContact}>
               Add

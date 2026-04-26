@@ -19,7 +19,11 @@ export async function createEvent(userId, hostName, eventData) {
       time: eventData.time,
       location: eventData.location,
       description: eventData.description,
-      attendees: (eventData.attendees || []).map(e => e.trim().toLowerCase()),
+      image_url: eventData.image_url ?? null,
+      attendees: (eventData.attendees || []).map(inv => ({
+        name: (inv.name ?? '').trim(),
+        email: (inv.email ?? '').trim().toLowerCase(),
+      })),
       host_id: userId,
       host_name: hostName,
       responses: { going: [], maybe: [], cant: [] },
@@ -40,7 +44,11 @@ export async function updateEvent(eventId, eventData) {
       time: eventData.time,
       location: eventData.location,
       description: eventData.description,
-      attendees: (eventData.attendees || []).map(e => e.trim().toLowerCase()),
+      image_url: eventData.image_url ?? null,
+      attendees: (eventData.attendees || []).map(inv => ({
+        name: (inv.name ?? '').trim(),
+        email: (inv.email ?? '').trim().toLowerCase(),
+      })),
     })
     .eq('id', eventId)
     .select()

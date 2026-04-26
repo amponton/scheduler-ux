@@ -1,16 +1,24 @@
-create table public.rsvps (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid references public.events on delete cascade not null,
-  user_id uuid references auth.users on delete cascade not null,
-  status text check (status in ('going', 'maybe', 'cant')) not null,
-  user_name text,
-  user_email text,
-  user_avatar_url text,
-  updated_at timestamptz default now(),
-  unique (event_id, user_id)
-);
+-- Clear all table data
+truncate table public.rsvps    restart identity cascade;
+truncate table public.events   restart identity cascade;
+truncate table public.profiles restart identity cascade;
 
-alter table public.rsvps enable row level security;
+-- === Simplify events RLS — new {name,email} object format only ===
+drop policy if exists "Host and invited users can view events" on public.events;
+create policy "Host and invited users can view events"
+  on public.events for select
+  using (
+    auth.uid() = host_id OR
+    exists (
+      select 1 from jsonb_array_elements(attendees) a
+      where a->>'email' = auth.email()
+    )
+  );
+
+-- === Simplify rsvps RLS ===
+drop policy if exists "Users can view rsvps for accessible events" on public.rsvps;
+drop policy if exists "Users can insert own rsvps"                 on public.rsvps;
+drop policy if exists "Users can update own rsvps"                 on public.rsvps;
 
 create policy "Users can view rsvps for accessible events"
   on public.rsvps for select
@@ -60,7 +68,3 @@ create policy "Users can update own rsvps"
       )
     )
   );
-
-create policy "Users can delete own rsvps"
-  on public.rsvps for delete
-  using (auth.uid() = user_id);

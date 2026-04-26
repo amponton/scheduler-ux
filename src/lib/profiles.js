@@ -18,6 +18,7 @@ export async function saveProfile(userId, settings) {
       name: settings.name,
       email: settings.email,
       phone: settings.phone,
+      avatar_url: settings.avatar_url ?? null,
       timezone: settings.timezone,
       notifications: settings.notifications,
       contacts: settings.contacts,

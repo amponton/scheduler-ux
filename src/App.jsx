@@ -16,6 +16,7 @@ function profileToSettings(profile) {
     name: profile.name ?? '',
     email: profile.email ?? '',
     phone: profile.phone ?? '',
+    avatar_url: profile.avatar_url ?? null,
     timezone: profile.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
     contacts: profile.contacts ?? [],
     notifications: profile.notifications ?? { remindVia: [], rsvpVia: [] },
@@ -112,7 +113,11 @@ export default function App() {
   async function handleRsvp(eventId, status) {
     const current = rsvps[eventId]
     const next = current === status ? undefined : status
+
     const userName = settings?.name || user?.user_metadata?.full_name || user?.email || 'Someone'
+    const userEmail = settings?.email || user?.email || ''
+    const userAvatarUrl = settings?.avatar_url || null
+    const attendee = { name: userName, email: userEmail, avatar_url: userAvatarUrl }
 
     const updateAttendees = (prev, remove, add) => {
       const a = {
@@ -120,8 +125,8 @@ export default function App() {
         maybe: [...(prev[eventId]?.maybe ?? [])],
         cant: [...(prev[eventId]?.cant ?? [])],
       }
-      if (remove) a[remove] = a[remove].filter(n => n !== userName)
-      if (add) a[add] = [...a[add], userName]
+      if (remove) a[remove] = a[remove].filter(x => x.name !== userName)
+      if (add) a[add] = [...a[add], attendee]
       return { ...prev, [eventId]: a }
     }
 
@@ -130,7 +135,7 @@ export default function App() {
 
     try {
       if (next) {
-        await upsertRsvp(user.id, eventId, next, userName)
+        await upsertRsvp(user.id, eventId, next, userName, userEmail, userAvatarUrl)
       } else {
         await deleteRsvp(user.id, eventId)
       }
@@ -176,6 +181,7 @@ export default function App() {
     <>
       <Nav
         user={user}
+        avatarUrl={settings?.avatar_url}
         view={view}
         onNavigate={navigate}
         onSignIn={signIn}
@@ -196,10 +202,21 @@ export default function App() {
           onDelete={handleDeleteEvent}
         />
       )}
-      {view === 'calendar' && <CalendarView events={events} rsvps={rsvps} rsvpAttendees={rsvpAttendees} onRsvp={handleRsvp} userId={user?.id} onEdit={setEditingEvent} onDelete={handleDeleteEvent} />}
+      {view === 'calendar' && (
+        <CalendarView
+          events={events}
+          rsvps={rsvps}
+          rsvpAttendees={rsvpAttendees}
+          onRsvp={handleRsvp}
+          userId={user?.id}
+          onEdit={setEditingEvent}
+          onDelete={handleDeleteEvent}
+        />
+      )}
       {view === 'settings' && settings && (
         <Settings
           settings={settings}
+          userId={user?.id}
           onSave={async (updated) => {
             setSettings(updated)
             await saveProfile(user.id, updated)
@@ -212,6 +229,7 @@ export default function App() {
         <CreateEventModal
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateEvent}
+          userId={user?.id}
         />
       )}
 
@@ -220,6 +238,7 @@ export default function App() {
           event={editingEvent}
           onClose={() => setEditingEvent(null)}
           onSave={handleEditEvent}
+          userId={user?.id}
         />
       )}
     </>

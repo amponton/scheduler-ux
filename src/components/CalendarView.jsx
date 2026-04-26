@@ -1,14 +1,50 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import EventDetailModal from './EventDetailModal'
 import { getEventBackground } from './EventImage'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function MonthPicker({ year, month, onSelect, onClose }) {
+  const [pickerYear, setPickerYear] = useState(year)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) onClose()
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [onClose])
+
+  return (
+    <div className="cal-picker" ref={ref}>
+      <div className="cal-picker-year-row">
+        <button className="cal-picker-year-btn" onClick={() => setPickerYear(y => y - 1)}>←</button>
+        <span className="cal-picker-year-label">{pickerYear}</span>
+        <button className="cal-picker-year-btn" onClick={() => setPickerYear(y => y + 1)}>→</button>
+      </div>
+      <div className="cal-picker-months">
+        {MONTHS.map((label, i) => (
+          <button
+            key={label}
+            className={`cal-picker-month${i === month && pickerYear === year ? ' active' : ''}`}
+            onClick={() => { onSelect(pickerYear, i); onClose() }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, userId, onEdit, onDelete }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
   const [selectedEvent, setSelectedEvent] = useState(null)
+  const [showPicker, setShowPicker] = useState(false)
 
   const firstDow = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -62,7 +98,24 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
     <main className="calendar-view">
       <div className="calendar-nav">
         <button className="cal-nav-btn" onClick={prevMonth}>←</button>
-        <span className="cal-month-label">{monthLabel}</span>
+
+        <div style={{ position: 'relative' }}>
+          <button
+            className="cal-month-label cal-month-label-btn"
+            onClick={() => setShowPicker(p => !p)}
+          >
+            {monthLabel}
+          </button>
+          {showPicker && (
+            <MonthPicker
+              year={year}
+              month={month}
+              onSelect={(y, m) => { setYear(y); setMonth(m) }}
+              onClose={() => setShowPicker(false)}
+            />
+          )}
+        </div>
+
         <button className="cal-nav-btn" onClick={nextMonth}>→</button>
       </div>
 

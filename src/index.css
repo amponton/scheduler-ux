@@ -394,8 +394,62 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   min-width: 180px;
   text-align: center;
 }
+.cal-month-label-btn {
+  border-radius: 6px;
+  padding: 4px 10px;
+  transition: background 0.12s;
+}
+.cal-month-label-btn:hover { background: var(--border); }
 .cal-nav-btn { font-size: 18px; color: var(--text-muted); padding: 4px 10px; border-radius: 4px; }
 .cal-nav-btn:hover { color: var(--text-heading); background: var(--border); }
+
+/* Month/year picker */
+.cal-picker {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 14px;
+  z-index: 150;
+  width: 220px;
+}
+.cal-picker-year-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cal-picker-year-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-heading);
+}
+.cal-picker-year-btn {
+  font-size: 15px;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.cal-picker-year-btn:hover { color: var(--text-heading); background: var(--bg); }
+.cal-picker-months {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.cal-picker-month {
+  padding: 6px 4px;
+  font-size: 13px;
+  color: var(--text-body);
+  border-radius: 5px;
+  text-align: center;
+  transition: background 0.1s, color 0.1s;
+}
+.cal-picker-month:hover { background: var(--bg); color: var(--text-heading); }
+.cal-picker-month.active { background: var(--text-heading); color: var(--surface); }
 
 .calendar-grid {
   display: grid;

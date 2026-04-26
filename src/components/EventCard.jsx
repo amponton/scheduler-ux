@@ -3,7 +3,7 @@ import DeleteConfirmButton from './DeleteConfirmButton'
 import { getEventBackground } from './EventImage'
 
 export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, showHost, onEdit, onDelete }) {
-  const { id, title, date, time, location, description, host_name, image_url } = event
+  const { id, title, date, time, location, description, host_name, image_url, attendees } = event
 
   const formattedDate = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'short',
@@ -14,7 +14,15 @@ export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, sh
   const going = rsvpAttendees?.going ?? []
   const maybe = rsvpAttendees?.maybe ?? []
   const cant = rsvpAttendees?.cant ?? []
-  const noResponses = going.length === 0 && maybe.length === 0 && cant.length === 0
+
+  const rsvpdEmails = new Set(
+    [...going, ...maybe, ...cant].map(a => a.email?.toLowerCase()).filter(Boolean)
+  )
+  const invited = (attendees ?? []).filter(
+    a => a.email && !rsvpdEmails.has(a.email.toLowerCase())
+  )
+
+  const noResponses = going.length === 0 && maybe.length === 0 && cant.length === 0 && invited.length === 0
 
   const bg = getEventBackground(image_url)
   const cardStyle = bg?.type === 'upload'
@@ -25,8 +33,10 @@ export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, sh
 
   return (
     <div className={`event-card${bg ? ' has-event-bg' : ''}`} style={cardStyle}>
-      {bg?.type === 'upload' && <div className="event-bg-overlay" />}
-      {bg?.type === 'preset' && <div className="event-bg-emoji" aria-hidden="true">{bg.emoji}</div>}
+      <div className="event-bg-clip">
+        {bg?.type === 'upload' && <div className="event-bg-overlay" />}
+        {bg?.type === 'preset' && <div className="event-bg-emoji" aria-hidden="true">{bg.emoji}</div>}
+      </div>
       <div className="event-card-body">
         <div className="event-meta">
           <span className="event-date">{formattedDate}</span>
@@ -47,6 +57,7 @@ export default function EventCard({ event, rsvpStatus, rsvpAttendees, onRsvp, sh
             <AttendeeGroup label="Attending" attendees={going} colorClass="response-going" />
             <AttendeeGroup label="Maybe" attendees={maybe} colorClass="response-maybe" />
             <AttendeeGroup label="Can't make it" attendees={cant} colorClass="response-cant" />
+            <AttendeeGroup label="Invited" attendees={invited} colorClass="response-invited" />
           </div>
           <div className="rsvp-buttons">
             {['going', 'maybe', 'cant'].map(status => (

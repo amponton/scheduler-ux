@@ -492,6 +492,25 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 .cal-day-today .cal-day-num { background: var(--text-heading); color: var(--surface); }
 .cal-day-num-overflow { color: var(--text-faint); }
+.cal-day-create {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--text-heading);
+  color: var(--surface);
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.cal-day-create:hover { opacity: 0.8; }
 .cal-event-chip {
   font-size: 11px;
   padding: 2px 7px;

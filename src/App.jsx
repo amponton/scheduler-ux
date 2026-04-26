@@ -32,6 +32,7 @@ export default function App() {
   const [rsvps, setRsvps] = useState({})
   const [rsvpAttendees, setRsvpAttendees] = useState({})
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createInitialDate, setCreateInitialDate] = useState(null)
   const [editingEvent, setEditingEvent] = useState(null)
   const [settings, setSettings] = useState(null)
 
@@ -186,7 +187,6 @@ export default function App() {
         onNavigate={navigate}
         onSignIn={signIn}
         onSignOut={signOut}
-        onCreateEvent={() => setShowCreateModal(true)}
       />
 
       {view === 'landing' && <LandingPage />}
@@ -196,7 +196,7 @@ export default function App() {
           rsvps={rsvps}
           rsvpAttendees={rsvpAttendees}
           onRsvp={handleRsvp}
-          onCreateEvent={() => setShowCreateModal(true)}
+          onCreateEvent={() => { setCreateInitialDate(null); setShowCreateModal(true) }}
           userId={user?.id}
           onEdit={setEditingEvent}
           onDelete={handleDeleteEvent}
@@ -211,6 +211,7 @@ export default function App() {
           userId={user?.id}
           onEdit={setEditingEvent}
           onDelete={handleDeleteEvent}
+          onCreateEvent={(date) => { setCreateInitialDate(date ?? null); setShowCreateModal(true) }}
         />
       )}
       {view === 'settings' && settings && (
@@ -227,9 +228,10 @@ export default function App() {
 
       {showCreateModal && (
         <CreateEventModal
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => { setShowCreateModal(false); setCreateInitialDate(null) }}
           onCreate={handleCreateEvent}
           userId={user?.id}
+          initialDate={createInitialDate}
         />
       )}
 

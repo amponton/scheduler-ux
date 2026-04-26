@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import ImagePicker from './ImagePicker'
 
-const EMPTY = {
-  title: '', date: '', time: '', location: '', description: '',
-  attendees: [], image_url: null,
-}
-
-export default function CreateEventModal({ onClose, onCreate, userId }) {
-  const [form, setForm] = useState(EMPTY)
+export default function CreateEventModal({ onClose, onCreate, userId, initialDate }) {
+  const [form, setForm] = useState({
+    title: '', date: initialDate ?? '', time: '', location: '', description: '',
+    attendees: [], image_url: null,
+  })
   const [newInvitee, setNewInvitee] = useState({ name: '', email: '' })
 
   function handleChange(e) {

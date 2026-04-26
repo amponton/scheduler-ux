@@ -9,7 +9,7 @@ function getInitials(name) {
     .toUpperCase() || '?'
 }
 
-export default function Nav({ user, avatarUrl, view, onNavigate, onSignIn, onSignOut, onCreateEvent }) {
+export default function Nav({ user, avatarUrl, view, onNavigate, onSignIn, onSignOut }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -50,10 +50,6 @@ export default function Nav({ user, avatarUrl, view, onNavigate, onSignIn, onSig
             >
               Calendar
             </button>
-            <button className="btn-outline" onClick={onCreateEvent}>
-              + New event
-            </button>
-
             <div className="profile-menu" ref={menuRef}>
               <button
                 className={`profile-btn${menuOpen || view === 'settings' ? ' active' : ''}`}

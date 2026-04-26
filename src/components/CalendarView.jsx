@@ -39,12 +39,13 @@ function MonthPicker({ year, month, onSelect, onClose }) {
   )
 }
 
-export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, userId, onEdit, onDelete }) {
+export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, userId, onEdit, onDelete, onCreateEvent }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [showPicker, setShowPicker] = useState(false)
+  const [hoveredCell, setHoveredCell] = useState(null)
 
   const firstDow = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -129,10 +130,22 @@ export default function CalendarView({ events, rsvps, rsvpAttendees, onRsvp, use
             <div
               key={i}
               className={`cal-day${!cell.current ? ' cal-day-empty' : ''}${isToday(cell) ? ' cal-day-today' : ''}`}
+              onMouseEnter={() => setHoveredCell(i)}
+              onMouseLeave={() => setHoveredCell(null)}
             >
               <span className={`cal-day-num${!cell.current ? ' cal-day-num-overflow' : ''}`}>
                 {cell.day}
               </span>
+              {hoveredCell === i && onCreateEvent && (
+                <button
+                  className="cal-day-create"
+                  onClick={() => {
+                    const dateStr = `${cell.year}-${String(cell.month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`
+                    onCreateEvent(dateStr)
+                  }}
+                  title="New event"
+                >+</button>
+              )}
               {dayEvents.map(e => {
                 const bg = getEventBackground(e.image_url)
                 const chipStyle = { cursor: 'pointer' }

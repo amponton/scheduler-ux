@@ -469,7 +469,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
-.cal-dow:not(:last-child) { border-right: 1px solid var(--border); }
+.cal-dow:not(:first-child) { border-left: 1px solid var(--border); }
 .cal-day {
   min-height: 88px;
   padding: 10px;
